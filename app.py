@@ -10,8 +10,7 @@ from vk import Vk
 def main_loop():
     last_fm = LastFm(keys.last_fm_username, keys.last_fm_password, keys.last_fm_api_key, keys.last_fm_shared_secret)
     vk = Vk(keys.vk_access_token)
-    default_status = vk.get_status()
-    print('Received default status from vk: {}'.format(default_status))
+    default_status = None
     old_track_status = ""
     while True:
         print('Loop started')
