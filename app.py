@@ -13,7 +13,6 @@ def main_loop():
     default_status = None
     old_track_status = ""
     while True:
-        print('Loop started')
         track = last_fm.get_last_fm_now_playing(keys.last_fm_username)
         if track:
             print('Now playing track:{}'.format(track.name))
@@ -39,7 +38,6 @@ def main_loop():
                 default_status = None
             else:
                 print('Default status is None')
-        print('Loop ended')
         time.sleep(10)
 
 if __name__ == '__main__':
