@@ -23,7 +23,7 @@ def main_loop():
                 default_status = vk.get_status()
                 print('Default status is none, setting default: {}'.format(default_status))
                 vk.set_status(new_track_status)
-                print('Setting new status on vk: {}'.format(default_status))
+                print('Setting new status on vk: {}'.format(new_track_status))
             else:
                 print('Default status: {}'.format(default_status))
                 if old_track_status != new_track_status:
