@@ -24,7 +24,7 @@ class Vk:
 
         response = requests.get(url)
         content = response.json()
-        if "error" in content:
+        if 'error' in content:
             raise Exception(content)
         else:
             return content
@@ -33,7 +33,7 @@ class Vk:
         # description of message could be find there: https://vk.com/dev/objects/message
         user_id = str(message['user_id'])
         body = message['body']
-        message = "Ты написал: {}".format(body)
+        message = 'Ты написал: {}'.format(body)
         self.messages_send_message(user_id, message)
 
     def _run_long_poll(self):
@@ -71,8 +71,6 @@ class Vk:
         key = response['response']['key']
         server = response['response']['server']
         timestamp = response['response']['ts']
-        print(response)
-        print(server)
         return key, server, timestamp
 
     def groups_set_long_poll_settings(self, group_id: str, enabled: bool = None, message_new: bool = None):
