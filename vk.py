@@ -40,7 +40,7 @@ class Vk:
         self.groups_set_long_poll_settings(self._group_id, enabled=True, message_new=True)
         key, server, timestamp = self.groups_get_long_poll_server(self._group_id)
         while True:
-            url = '{}?act=a_check&key={}&ts={}&wait=20'.format(server, key, timestamp)
+            url = '{}?act=a_check&key={}&ts={}&wait=15'.format(server, key, timestamp)
             response = requests.get(url)
             print(response.status_code)
             print(response.content)
