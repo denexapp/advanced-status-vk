@@ -76,9 +76,9 @@ class Vk:
     def groups_set_long_poll_settings(self, group_id: str, enabled: bool = None, message_new: bool = None):
         parameters = {'group_id': group_id}
         if enabled is not None:
-            parameters['enabled'] = 1 if enabled else 0
+            parameters['enabled'] = '1' if enabled else '0'
         if message_new is not None:
-            parameters['message_new'] = 1 if message_new else 0
+            parameters['message_new'] = '1' if message_new else '0'
         self._make_vk_request('groups.setLongPollSettings', parameters)
 
     def status_set_status(self, text: str, group_id: str = None):
