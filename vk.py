@@ -40,7 +40,7 @@ class Vk:
         self.groups_set_long_poll_settings(self._group_id, enabled=True, message_new=True)
         key, server, timestamp = self.groups_get_long_poll_server(self._group_id)
         while True:
-            url = 'https://{}?act=a_check&key={}&ts={}&wait=25'.format(server, key, timestamp)
+            url = '{}?act=a_check&key={}&ts={}&wait=25'.format(server, key, timestamp)
             response = requests.get(url)
             content = response.json()
             if 'failed' in content:
