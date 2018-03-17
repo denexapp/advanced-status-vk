@@ -42,6 +42,8 @@ class Vk:
         while True:
             url = '{}?act=a_check&key={}&ts={}&wait=25'.format(server, key, timestamp)
             response = requests.get(url)
+            print(response.status_code)
+            print(response.content)
             content = response.json()
             if 'failed' in content:
                 error_code = content['failed']
