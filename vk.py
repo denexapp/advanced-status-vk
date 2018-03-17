@@ -41,6 +41,7 @@ class Vk:
         key, server, timestamp = self.groups_get_long_poll_server(self._group_id)
         while True:
             url = 'https://{}?act=a_check&key={}&ts={}&wait=25'.format(server, key, timestamp)
+            print(url)
             response = requests.get(url)
             content = response.json()
             if 'failed' in content:
