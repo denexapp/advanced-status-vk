@@ -71,6 +71,8 @@ class Vk:
         key = response['response']['key']
         server = response['response']['server']
         timestamp = response['response']['ts']
+        print(response)
+        print(server)
         return key, server, timestamp
 
     def groups_set_long_poll_settings(self, group_id: str, enabled: bool = None, message_new: bool = None):
