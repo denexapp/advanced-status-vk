@@ -6,7 +6,7 @@ T = TypeVar('T')
 
 
 class SortedQueue(Generic[T]):
-    def __init__(self, key: Callable[[T], int]):
+    def __init__(self, key: Callable[[T], float]):
         self._next = None
         self._count = 0
         self._get_key = key
@@ -19,7 +19,7 @@ class SortedQueue(Generic[T]):
                 node = node._next
             else:
                 break
-        node._next = SortedQueue.Node(item, self._get_key(item), node._next)
+        node._next = self._Node(item, self._get_key(item), node._next)
         self._count += 1
 
     def pop(self) -> T:
@@ -31,13 +31,13 @@ class SortedQueue(Generic[T]):
         return result.item
 
     def get_head(self) -> T:
-        return self._next.item
+        return self._next.item if self._next is not None else None
 
     def __len__(self):
         return self._count
 
-    class Node(Generic[T]):
-        def __init__(self, item: T, key: int, next_node: 'SortedQueue.Node' = None):
+    class _Node(Generic[T]):
+        def __init__(self, item: T, key: float, next_node: 'SortedQueue._Node' = None):
             self.item = item
             self._next = next_node
             self.key = key
