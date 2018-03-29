@@ -38,7 +38,8 @@ class Server:
 
     async def _vk_auth_code_handler(self, request: web.Request) -> web.Response:
         if not request.secure:
-            raise web.HTTPFound(request.url)
+            new_url = request.url.with_scheme('https')
+            raise web.HTTPFound(new_url)
         url = '{}://{}{}'.format(request.scheme, request.host, request.path)
         query = request.query
         if 'code' in query:
