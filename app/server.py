@@ -34,6 +34,8 @@ class Server:
                     print('Can\'t find user: {}'.format(user_id))
             else:
                 print('Can\'t find access token:')
+                print(redirect_uri)
+                print(code)
                 print(result)
 
     def _redirect_to_https(self, url):
