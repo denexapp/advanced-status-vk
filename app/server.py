@@ -49,7 +49,7 @@ class Server:
             self._redirect_to_https(request.url)
         elif request.headers['X-Forwarded-Proto'] != 'https':
             self._redirect_to_https(request.url)
-        url = '{}://{}{}'.format(request.scheme, request.host, request.path)
+        url = '{}://{}{}'.format('https', request.host, request.path)
         query = request.query
         if 'code' in query:
             code = query['code']
