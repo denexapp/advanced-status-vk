@@ -23,3 +23,6 @@ class Data:
 
     def get_users(self) -> Iterable['Data.User']:
         return self._users.values[:]
+
+    def get_user(self, user_id: str) -> 'Data.User':
+        return self._users[user_id]
