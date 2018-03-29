@@ -36,10 +36,17 @@ class Server:
                 print('Can\'t find access token:')
                 print(result)
 
+    def _redirect_to_https(self, url):
+        url.with_scheme('https')
+        raise web.HTTPFound(url)
+
     async def _vk_auth_code_handler(self, request: web.Request) -> web.Response:
-        if not request.url.scheme == 'https':
-            new_url = request.url.with_scheme('https')
-            raise web.HTTPFound(new_url)
+        if request.secure:
+            pass
+        elif not 'X-Forwarded-Proto' in request.headers:
+            self._redirect_to_https(request.url)
+        elif request.headers['X-Forwarded-Proto'] != 'https':
+            self._redirect_to_https(request.url)
         url = '{}://{}{}'.format(request.scheme, request.host, request.path)
         query = request.query
         if 'code' in query:
