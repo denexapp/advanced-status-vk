@@ -26,7 +26,7 @@ class Server:
         async with self._session.get(url, params=parameters) as response:
             result = await response.json()
             if 'access_token' in result:
-                user_id = result['user_id']
+                user_id = str(result['user_id'])
                 access_token = result['access_token']
                 if self._data.does_user_exist(user_id):
                     self._data.add_vk_access_token(user_id, access_token)
