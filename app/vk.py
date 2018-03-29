@@ -44,13 +44,15 @@ class Vk:
         user_id = str(message['user_id'])
         body = message['body']
         if not self._data.does_user_exist(user_id):
+            self._data.add_user(user_id)
+        user = self._data.get_user(user_id)
+        if user.vk_token is None:
             message = 'Для начала тебя нужно авторизовать. Перейди по ссылке: ' + keys.vk_auth_link
             await self.messages_send_message(user_id, message)
-            return
         else:
             message = 'Устанавливаю статус в: {}'.format(body)
             await self.messages_send_message(user_id, message)
-            await self.status_set_status(body)
+            await self.status_set_status(body, user.vk_token)
             message = 'Готово.'
             await self.messages_send_message(user_id, message)
 
@@ -96,11 +98,11 @@ class Vk:
             parameters['message_new'] = '1' if message_new else '0'
         await self._prepare_vk_request('groups.setLongPollSettings', parameters)
 
-    async def status_set_status(self, text: str, group_id: str = None):
+    async def status_set_status(self, text: str, token: str = None, group_id: str = None):
         parameters = {'text': text}
         if group_id:
             parameters['group_id'] = group_id
-        await self._prepare_vk_request('status.set', parameters)
+        await self._prepare_vk_request('status.set', parameters, access_token=token)
 
     async def status_get_status(self, user_id: str = None, group_id: str = None) -> str:
         parameters = {}
