@@ -9,5 +9,4 @@ class BotData(BaseData):
 
     def add_user(self, user_id: str, token: str = None):
         user = BotUser(user_id, token=token)
-        if token:
-            self._users[user_id] = user
+        self._users[user_id] = user
