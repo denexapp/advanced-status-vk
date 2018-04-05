@@ -55,29 +55,41 @@ class Bot:
     def _extract_token(self, url: str, user_id: str) -> str:
         url = URL(url)
         if url.scheme != 'https':
+            print('1')
             return None
         elif url.host is None:
+            print('2')
             return None
         elif url.host != 'oauth.vk.com':
+            print('3')
             return None
         elif url.path != '/blank.html':
+            print('4')
             return None
         elif url.fragment == '':
+            print('5')
             return None
         elif url.query_string != '':
+            print('6')
             return None
         query = url.with_query(url.fragment).query
         if 'access_token' not in query:
+            print('7')
             return None
         elif query['access_token'] == '':
+            print('8')
             return None
         elif 'expires_in' not in query:
+            print('9')
             return None
         elif query['expires_in'] != '0':
+            print('10')
             return None
         elif user_id not in query:
+            print('11')
             return None
         elif query['user_id'] != user_id:
+            print('12')
             return None
         return query['access_token']
 
