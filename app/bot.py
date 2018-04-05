@@ -22,9 +22,7 @@ class Bot:
         self._loop.create_task(self._watch_vk_messages())
 
     async def _watch_vk_messages(self):
-        messages = self._vk.get_message()
-        while True:
-            message = await next(messages)
+        async for message in self._vk.get_message():
             self._loop.create_task(self._handle_message(message))
 
     async def _handle_message(self, message: Dict):

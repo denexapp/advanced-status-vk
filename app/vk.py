@@ -1,7 +1,7 @@
 # coding=utf-8
 # Project available at https://github.com/denexapp/advanced-status-vk
 import asyncio
-from typing import Dict, Tuple
+from typing import Dict, Tuple, AsyncIterable
 
 import aiohttp
 
@@ -38,7 +38,7 @@ class Vk:
         await self._rate_limiter.wait_before_request(access_token, delay)
         return await self._make_vk_request(url, parameters)
 
-    async def get_message(self) -> Dict:
+    async def get_message(self) -> AsyncIterable:
         await self.groups_set_long_poll_settings(self._group_id, enabled=True, message_new=True)
         key, server, timestamp = await self.groups_get_long_poll_server(self._group_id)
         while True:
