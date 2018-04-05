@@ -5,17 +5,16 @@ from typing import Dict, Tuple
 
 import aiohttp
 
-from app import keys
-from app.data import Data
+from app.basedata import BaseData
 from app.ratelimiter import RateLimiter
 
 
 class Vk:
     def __init__(self, group_id: str, group_access_token: str, loop: asyncio.AbstractEventLoop,
-                 session: aiohttp.ClientSession, data: Data, api_version: str = '5.73'):
+                 session: aiohttp.ClientSession, api_version: str = '5.74'):
         self._group_id = group_id  # type: str
         self._group_access_token = group_access_token  # type: str
-        self._data = data  # type: Data
+        self._data = BaseData()  # type: BaseData
         self._api_version = api_version  # type: str
         self._session = session  # type: aiohttp.ClientSession
         self._loop = loop  # type: asyncio.AbstractEventLoop
@@ -39,24 +38,7 @@ class Vk:
         await self._rate_limiter.wait_before_request(access_token, delay)
         return await self._make_vk_request(url, parameters)
 
-    async def _handle_message(self, message: Dict):
-        # description of message could be find there: https://vk.com/dev/objects/message
-        user_id = str(message['user_id'])
-        body = message['body']
-        if not self._data.does_user_exist(user_id):
-            self._data.add_user(user_id)
-        user = self._data.get_user(user_id)
-        if user.vk_token is None:
-            message = 'Для начала тебя нужно авторизовать. Перейди по ссылке: ' + keys.vk_auth_link
-            await self.messages_send_message(user_id, message)
-        else:
-            message = 'Устанавливаю статус в: {}'.format(body)
-            await self.messages_send_message(user_id, message)
-            await self.status_set_status(body, user.vk_token)
-            message = 'Готово.'
-            await self.messages_send_message(user_id, message)
-
-    async def run_long_poll(self):
+    async def get_message(self) -> Dict:
         await self.groups_set_long_poll_settings(self._group_id, enabled=True, message_new=True)
         key, server, timestamp = await self.groups_get_long_poll_server(self._group_id)
         while True:
@@ -76,7 +58,7 @@ class Vk:
                 updates = content['updates']
                 for event in updates:
                     if event['type'] == 'message_new':
-                        self._loop.create_task(self._handle_message(event['object']))
+                        yield event['object']
 
     async def messages_send_message(self, user_id: str, message: str):
         parameters = {'user_id': user_id, 'message': message}
@@ -104,12 +86,18 @@ class Vk:
             parameters['group_id'] = group_id
         await self._prepare_vk_request('status.set', parameters, access_token=token)
 
-    async def status_get_status(self, user_id: str = None, group_id: str = None) -> str:
+    async def status_get_status(self, token: str = None, user_id: str = None, group_id: str = None) -> Tuple[str, bool]:
         parameters = {}
         if user_id:
             parameters['user_id'] = user_id
         if group_id:
             parameters['group_id'] = group_id
-        response = await self._prepare_vk_request('status.get', parameters)
+        response = await self._prepare_vk_request('status.get', parameters, access_token=token)
         status = response['response']['text']
-        return status
+        audio = 'audio' in response['response']
+        return status, audio
+
+    # async def secure_check_token(self, token: str, ip: str) -> Dict:
+    #     parameters = {'token': token, 'ip': ip}
+    #     response = await self._prepare_vk_request('secure.checkToken', parameters, access_token=self._client_secret)
+    #     return response['response']

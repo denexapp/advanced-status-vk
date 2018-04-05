@@ -6,12 +6,12 @@ import aiohttp
 from aiohttp import web
 
 from app import keys
-from app.data import Data
+from app.basedata import BaseData
 
 
 class Server:
-    def __init__(self, data: Data, session: aiohttp.ClientSession, loop: asyncio.AbstractEventLoop):
-        self._data = data  # type: Data
+    def __init__(self, data: BaseData, session: aiohttp.ClientSession, loop: asyncio.AbstractEventLoop):
+        self._data = data  # type: BaseData
         self._session = session  # type: aiohttp.ClientSession
         self._loop = loop
 
