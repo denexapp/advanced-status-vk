@@ -75,7 +75,7 @@ class Bot:
             return None
         elif query['expires_in'] != '0':
             return None
-        elif user_id not in query:
+        elif 'user_id' not in query:
             return None
         elif query['user_id'] != user_id:
             return None
