@@ -54,9 +54,9 @@ class Vk:
                 if error_code == 1:
                     timestamp = content['ts']
                 elif error_code == 2:
-                    key, _, _ = self.groups_get_long_poll_server(self._group_id)
+                    key, _, _ = await self.groups_get_long_poll_server(self._group_id)
                 elif error_code == 2:
-                    key, _, ts = self.groups_get_long_poll_server(self._group_id)
+                    key, _, ts = await self.groups_get_long_poll_server(self._group_id)
             else:
                 timestamp = content['ts']
                 updates = content['updates']
