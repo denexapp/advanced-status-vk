@@ -38,7 +38,6 @@ class Bot:
                 self._bot_data.update_user(user_id, token)
                 message = 'Отлично! Теперь напиши мне статус для установки.'
                 await self._vk.messages_send_message(user_id, message)
-
             else:
                 message = 'Для начала тебя нужно авторизовать. ' \
                           'Перейди по ссылке и пришли мне ссылку из адресной строки: \n' \
