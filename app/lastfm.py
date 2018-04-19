@@ -63,10 +63,13 @@ class LastFm:
         await self._rate_limiter.wait_before_request('request', self._rate)
         url = "https://ws.audioscrobbler.com/2.0/?"
         if session_key_request:
-            response = await self._session.post(url, params=parameters.get_sorted_parameters())
+            async with self._session.post(url, params=parameters.get_sorted_parameters()) as response:
+                xml = await response.text(encoding='utf8')
+                result = minidom.parseString(xml)
         else:
-            response = await self._session.get(url, params=parameters.get_sorted_parameters())
-        return response.json() if not session_key_request else minidom.parseString(response.content.decode())
+            async with await self._session.get(url, params=parameters.get_sorted_parameters()) as response:
+                result = await response.json()
+        return result
 
     async def get_token(self, code: str) -> Tuple[str, str]:
         parameters = self._RequestParameters('auth.getSession') \
