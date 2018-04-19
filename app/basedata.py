@@ -17,7 +17,7 @@ class BaseData:
         return user_id in self._users
 
     def get_users(self) -> Iterable[Any]:
-        return self._users.values[:]
+        return self._users.values()[:]
 
     def get_user(self, user_id: str) -> Any:
         return self._users[user_id]
