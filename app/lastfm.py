@@ -1,11 +1,14 @@
 # coding=utf-8
 # Project available at https://github.com/denexapp/advanced-status-vk
-from typing import List, Dict, Tuple
-import urllib
+import asyncio
+from typing import List, Dict, Tuple, AsyncIterable
 import hashlib
 import xml.dom.minidom as minidom
 
-import requests
+import aiohttp
+
+from app.lastfmdata import LastFmData
+from app.ratelimiter import RateLimiter
 
 
 class LastFm:
@@ -28,10 +31,16 @@ class LastFm:
             self.name: str = name
             self.artist: str = artist
 
-    def __init__(self, username: str, password: str, api_key: str, shared_secret: str):
+    def __init__(self, api_key: str, shared_secret: str, data: LastFmData, loop: asyncio.AbstractEventLoop,
+                 session: aiohttp.ClientSession):
         self._api_key: str = api_key
         self._shared_secret: str = shared_secret
-        self._session_key: str = self._get_last_fm_token(username, password)
+        self._session: aiohttp.ClientSession = session
+        self._data: LastFmData = data
+        self._loop: asyncio.AbstractEventLoop = loop
+        self._rate_limiter: RateLimiter = RateLimiter(loop)
+        self._rate = 0.2
+        self._pool_rate = 10
 
     def _make_last_fm_request_signature(self, request_parameters: _RequestParameters) -> str:
         signing_string = ""
@@ -40,41 +49,38 @@ class LastFm:
         signing_string += self._shared_secret
         return hashlib.md5(signing_string.encode()).hexdigest()
 
-    def _make_last_fm_request(self, parameters: _RequestParameters,
-                              session_key_request: bool = False, requires_signing: bool = False):
+    async def _make_last_fm_request(self, parameters: _RequestParameters, session_key_request: bool = False,
+                                    requires_signing: bool = False, session_key: str = None):
         parameters.add_parameter('api_key', self._api_key)
         if not session_key_request:
-            parameters.add_parameter('sk', self._session_key)
             # When it requests for session key, no format needed
             parameters.add_parameter('format', 'json')
+        if session_key:
+            parameters.add_parameter('sk', session_key)
         if requires_signing or session_key_request:
             signature = self._make_last_fm_request_signature(parameters)
             parameters.add_parameter('api_sig', signature)
-
+        await self._rate_limiter.wait_before_request('request', self._rate)
         url = "https://ws.audioscrobbler.com/2.0/?"
-        for name, value in parameters.get_parameters():
-            url += '{}={}&'.format(urllib.parse.quote(name), urllib.parse.quote(value))
-        url = url[:-1]
-
         if session_key_request:
-            response = requests.post(url)
+            response = await self._session.post(url, params=parameters.get_sorted_parameters())
         else:
-            response = requests.get(url)
+            response = await self._session.get(url, params=parameters.get_sorted_parameters())
         return response.json() if not session_key_request else minidom.parseString(response.content.decode())
 
-    def _get_last_fm_token(self, username: str, password: str) -> str:
-        parameters = self._RequestParameters('auth.getMobileSession')\
-            .add_parameter('username', username)\
-            .add_parameter('password', password)
-        response = self._make_last_fm_request(parameters, session_key_request=True)
+    async def get_token(self, code: str) -> Tuple[str, str]:
+        parameters = self._RequestParameters('auth.getSession') \
+            .add_parameter('token ', code)
+        response = await self._make_last_fm_request(parameters, session_key_request=True)
         token = response.getElementsByTagName('key')[0].childNodes[0].data
-        return token
+        username = response.getElementsByTagName('key')[0].childNodes[0].data
+        return token, username
 
-    def get_last_fm_now_playing(self, username: str) -> Track:
-        parameters = self._RequestParameters('user.getRecentTracks')\
-            .add_parameter('limit', '1')\
+    async def get_now_playing(self, username: str) -> Track:
+        parameters = self._RequestParameters('user.getRecentTracks') \
+            .add_parameter('limit', '1') \
             .add_parameter('user', username)
-        response = self._make_last_fm_request(parameters)
+        response = await self._make_last_fm_request(parameters)
         track = response["recenttracks"]['track'][0]
         now_playing = False
         if '@attr' in track:
@@ -83,3 +89,15 @@ class LastFm:
         if not now_playing:
             return None
         return self.Track(track['name'], track['artist']['#text'])
+
+    async def get_new_now_playing(self) -> AsyncIterable:
+        await self._rate_limiter.wait_before_request('requests', self._pool_rate)
+        tasks = [lambda user=user: (user, self.get_now_playing(user)) for user in self._data.get_users()]
+        for task in asyncio.as_completed(tasks, loop=self._loop):
+            user, track = await task
+            if track:
+                if user.track_name != track.name or user.track_artist != track.artist:
+                    self._data.update_user(user, track_name=track.name, track_artist=track.artist)
+                    yield user.vk_user_ids, track
+            else:
+                self._data.none_user(user, user.track_name is not None, user.track_artist is not None)

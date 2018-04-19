@@ -5,18 +5,25 @@ import aiohttp
 from yarl import URL
 
 from app.botdata import BotData
+from app.lastfm import LastFm
+from app.lastfmdata import LastFmData
 from app.vk import Vk
 
 
 class Bot:
-    def __init__(self, group_id: str, group_access_token: str, loop: asyncio.AbstractEventLoop,
-                 session: aiohttp.ClientSession):
-        self._group_id = group_id  # type: str
-        self._group_access_token = group_access_token  # type: str
-        self._loop = loop  # type: asyncio.AbstractEventLoop
-        self._session = session  # type: aiohttp.ClientSession
-        self._vk = Vk(self._group_id, self._group_access_token, self._loop, self._session)  # type: Vk
-        self._bot_data = BotData()  # type: BotData
+    def __init__(self, group_id: str, group_access_token: str, last_fm_api_key: str, last_fm_shared_secret: str,
+                 loop: asyncio.AbstractEventLoop, session: aiohttp.ClientSession):
+        self._group_id: str = group_id
+        self._group_access_token: str = group_access_token
+        self._loop: asyncio.AbstractEventLoop = loop
+        self._session: aiohttp.ClientSession = session
+
+        self._bot_data: BotData = BotData()
+        self._last_fm_data: LastFmData = LastFmData()
+
+        self._vk: Vk = Vk(self._group_id, self._group_access_token, self._loop, self._session)
+        self._last_fm: LastFm = LastFm(last_fm_api_key, last_fm_shared_secret, self._last_fm_data,
+                                       self._loop, self._session)
 
     async def run_bot(self):
         self._loop.create_task(self._watch_vk_messages())
@@ -25,10 +32,23 @@ class Bot:
         async for message in self._vk.get_message():
             self._loop.create_task(self._handle_message(message))
 
+    async def _watch_last_fm_tracks(self):
+        async for user_ids, track in self._last_fm.get_new_now_playing():
+            for user_id in user_ids:
+                self._loop.create_task(self._set_status(user_id, track))
+
+    async def _set_status(self, user_id: str, track: LastFm.Track):
+        if track:
+            status = "Слушает {} - {}, vk.me/advancedstatus"\
+                .format(track.name, track.artist)
+        else:
+            status = "vk.me/advancedstatus"
+        await self._vk.status_set_status(status, self._bot_data.get_user(user_id).vk_token)
+
     async def _handle_message(self, message: Dict):
         # description of message could be find there: https://vk.com/dev/objects/message
-        user_id = str(message['user_id'])
-        body = message['body']
+        user_id: str = str(message['user_id'])
+        body: str = message['body']
         if not self._bot_data.is_user_exist(user_id):
             self._bot_data.add_user(user_id)
         user = self._bot_data.get_user(user_id)
@@ -46,9 +66,17 @@ class Bot:
                           'scope=offline,status&response_type=token&v=5.74'
                 await self._vk.messages_send_message(user_id, message)
 
+        elif body.startswith('setlastfm '):
+            #todo
+            last_fm_id = body[10:]
+            self._last_fm_data.add_user(last_fm_id, user_id)
+        elif body.startswith('unsetlastfm '):
+            pass
+        elif body.startswith('forget'):
+            pass
         else:
-            await self._vk.status_set_status(body, user.vk_token)
-            message = 'Установил статус: {}'.format(body)
+            message = 'Эта команда не поддерживается, потому что мой' \
+                      'разработчик ленивая жопа.'
             await self._vk.messages_send_message(user_id, message)
 
     def _extract_token(self, url: str, user_id: str) -> str:

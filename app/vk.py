@@ -15,8 +15,8 @@ class Vk:
         self._group_id = group_id  # type: str
         self._group_access_token = group_access_token  # type: str
         self._data = BaseData()  # type: BaseData
-        self._api_version = api_version  # type: str
-        self._session = session  # type: aiohttp.ClientSession
+        self._api_version: str = api_version
+        self._session: aiohttp.ClientSession = session
         self._loop = loop  # type: asyncio.AbstractEventLoop
         self._rate_limiter = RateLimiter(loop)  # type: RateLimiter
 
