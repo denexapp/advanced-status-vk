@@ -27,6 +27,7 @@ class Bot:
 
     async def run_bot(self):
         self._loop.create_task(self._watch_vk_messages())
+        self._loop.create_task(self._watch_last_fm_tracks())
 
     async def _watch_vk_messages(self):
         async for message in self._vk.get_message():
@@ -56,7 +57,8 @@ class Bot:
             token = self._extract_token(body, user_id)
             if token:
                 self._bot_data.update_user(user_id, token)
-                message = 'Отлично! Теперь напиши мне статус для установки.'
+                message = 'Отлично, теперь ты можешь подключить аккаунт Last.Fm командой:\n' \
+                          'setlastfm твой_ник'
                 await self._vk.messages_send_message(user_id, message)
             else:
                 message = 'Для начала тебя нужно авторизовать. ' \
