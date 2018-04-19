@@ -34,7 +34,9 @@ class Bot:
             self._loop.create_task(self._handle_message(message))
 
     async def _watch_last_fm_tracks(self):
+        print(0)
         async for user_ids, track in self._last_fm.get_new_now_playing():
+            print(1)
             for user_id in user_ids:
                 self._loop.create_task(self._set_status(user_id, track))
 
@@ -72,6 +74,8 @@ class Bot:
             #todo
             last_fm_id = body[10:]
             self._last_fm_data.add_user(last_fm_id, user_id)
+            message = 'Добавил {} для пользователя {}'.format(last_fm_id, user_id)
+            await self._vk.messages_send_message(user_id, message)
         elif body.startswith('unsetlastfm '):
             pass
         elif body.startswith('forget'):
