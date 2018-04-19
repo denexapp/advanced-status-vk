@@ -13,7 +13,8 @@ def start_bot():
     session = aiohttp.ClientSession(loop=loop)
     # server = LastFmServer(data, session, loop)
     # loop.create_task(server.run())
-    bot = Bot(keys.vk_group_id, keys.vk_group_access_token, loop, session)
+    bot = Bot(keys.vk_group_id, keys.vk_group_access_token, keys.last_fm_api_key, keys.last_fm_shared_secret,
+              loop, session)
     loop.create_task(bot.run_bot())
     loop.run_forever()
 
