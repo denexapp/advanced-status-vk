@@ -91,23 +91,24 @@ class LastFm:
         return self.Track(track['name'], track['artist']['#text'])
 
     async def get_new_now_playing(self) -> AsyncIterable:
-        print(2)
-        await self._rate_limiter.wait_before_request('requests', self._pool_rate)
-        print(3)
-        tasks = [lambda user=user: (user, self.get_now_playing(user)) for user in self._data.get_users()]
-        print(4)
-        for task in asyncio.as_completed(tasks, loop=self._loop):
-            print(5)
-            user, track = await task
-            print(6)
-            if track:
-                print(7)
-                if user.track_name != track.name or user.track_artist != track.artist:
-                    print(8)
-                    self._data.update_user(user, track_name=track.name, track_artist=track.artist)
-                    yield user.vk_user_ids, track
-                    print(9)
-            else:
-                print(10)
-                self._data.none_user(user, user.track_name is not None, user.track_artist is not None)
-        print(11)
+        while True:
+            print(2)
+            await self._rate_limiter.wait_before_request('requests', self._pool_rate)
+            print(3)
+            tasks = [lambda user=user: (user, self.get_now_playing(user)) for user in self._data.get_users()]
+            print(4)
+            for task in asyncio.as_completed(tasks, loop=self._loop):
+                print(5)
+                user, track = await task
+                print(6)
+                if track:
+                    print(7)
+                    if user.track_name != track.name or user.track_artist != track.artist:
+                        print(8)
+                        self._data.update_user(user, track_name=track.name, track_artist=track.artist)
+                        yield user.vk_user_ids, track
+                        print(9)
+                else:
+                    print(10)
+                    self._data.none_user(user, user.track_name is not None, user.track_artist is not None)
+            print(11)
