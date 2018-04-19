@@ -98,7 +98,7 @@ class LastFm:
             print(2)
             await self._rate_limiter.wait_before_request('requests', self._pool_rate)
             print(3)
-            tasks = [self._get_now_playing_with_username(user) for user in self._data.get_users()]
+            tasks = [self._get_now_playing_with_username(user.user_id) for user in self._data.get_users()]
             print(4)
             for task in asyncio.as_completed(tasks, loop=self._loop):
                 print(5)
