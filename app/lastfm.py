@@ -90,12 +90,15 @@ class LastFm:
             return None
         return self.Track(track['name'], track['artist']['#text'])
 
+    async def _get_now_playing_with_username(self, username: str) -> Tuple[str, Track]:
+        return username, await self.get_now_playing(username)
+
     async def get_new_now_playing(self) -> AsyncIterable:
         while True:
             print(2)
             await self._rate_limiter.wait_before_request('requests', self._pool_rate)
             print(3)
-            tasks = [lambda user=user: (user, self.get_now_playing(user)) for user in self._data.get_users()]
+            tasks = [self._get_now_playing_with_username(user) for user in self._data.get_users()]
             print(4)
             for task in asyncio.as_completed(tasks, loop=self._loop):
                 print(5)
