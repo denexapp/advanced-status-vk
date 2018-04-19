@@ -110,3 +110,4 @@ class LastFm:
             else:
                 print(10)
                 self._data.none_user(user, user.track_name is not None, user.track_artist is not None)
+        print(11)
