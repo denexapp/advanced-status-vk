@@ -107,5 +107,10 @@ class LastFm:
                         self._data.update_user(user.user_id, track_name=track.name, track_artist=track.artist)
                         yield user.vk_user_ids, track
                 else:
-                    # todo yield none too
-                    self._data.none_user(user.user_id, user.track_name is not None, user.track_artist is not None)
+                    user_track_exist = user.track_name is not None
+                    user_artist_exist = user.track_artist is not None
+                    if user_artist_exist or user_track_exist:
+                        self._data.none_user(user.user_id,
+                                             track_name=user_track_exist,
+                                             track_artist=user_artist_exist)
+                        yield None
