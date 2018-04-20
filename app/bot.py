@@ -56,7 +56,7 @@ class Bot:
         if not user.vk_token:
             token = self._extract_token(body, user_id)
             if token:
-                self._bot_data.update_user(user_id, token)
+                self._bot_data.update_user(user_id, token=token)
                 message = 'Отлично, теперь ты можешь подключить аккаунт Last.Fm командой:\n' \
                           'setlastfm твой_ник'
                 await self._vk.messages_send_message(user_id, message)
