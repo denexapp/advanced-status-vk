@@ -34,16 +34,14 @@ class Bot:
             self._loop.create_task(self._handle_message(message))
 
     async def _watch_last_fm_tracks(self):
-        print(0)
         async for user_ids, track in self._last_fm.get_new_now_playing():
-            print(1)
             for user_id in user_ids:
                 self._loop.create_task(self._set_status(user_id, track))
 
     async def _set_status(self, user_id: str, track: LastFm.Track):
         if track:
             status = "Слушает {} - {}, vk.me/advancedstatus"\
-                .format(track.name, track.artist)
+                .format(track.artist, track.name)
         else:
             status = "vk.me/advancedstatus"
         await self._vk.status_set_status(status, self._bot_data.get_user(user_id).vk_token)
