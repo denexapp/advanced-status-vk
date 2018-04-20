@@ -34,9 +34,8 @@ class Bot:
             self._loop.create_task(self._handle_message(message))
 
     async def _watch_last_fm_tracks(self):
-        async for user_ids, track in self._last_fm.get_new_now_playing():
-            for user_id in user_ids:
-                self._loop.create_task(self._set_status(user_id, track))
+        async for user_id, track in self._last_fm.get_new_now_playing():
+            self._loop.create_task(self._set_status(user_id, track))
 
     async def _set_status(self, user_id: str, track: LastFm.Track):
         if track:
@@ -67,7 +66,6 @@ class Bot:
                           'redirect_uri=https://oauth.vk.com/blank.html&' \
                           'scope=offline,status&response_type=token&v=5.74'
                 await self._vk.messages_send_message(user_id, message)
-
         elif body.startswith('setlastfm '):
             last_fm_id = body[10:]
             # todo transaction safe, data validation
