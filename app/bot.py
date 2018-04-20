@@ -68,7 +68,7 @@ class Bot:
                 await self._vk.messages_send_message(user_id, message)
         elif body.startswith('setlastfm '):
             last_fm_id = body[10:]
-            # todo transaction safe, data validation
+            # todo transaction safe, data validation, sql injection awareness
             if user.last_fm_id:
                 # remove old user
                 previous_last_fm_user = self._last_fm_data.get_user(user.last_fm_id)
