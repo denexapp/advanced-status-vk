@@ -1,5 +1,6 @@
 # coding=utf-8
 # Project available at https://github.com/denexapp/advanced-status-vk
+import copy
 from typing import Iterable, Any
 
 
@@ -17,7 +18,7 @@ class BaseData:
         return user_id in self._users
 
     def get_users(self) -> Iterable[Any]:
-        return self._users.values()
+        return map(lambda x: copy.copy(x), self._users.values())
 
     def get_user(self, user_id: str) -> Any:
         return self._users[user_id]
