@@ -69,18 +69,54 @@ class Bot:
                 await self._vk.messages_send_message(user_id, message)
 
         elif body.startswith('setlastfm '):
-            #todo
             last_fm_id = body[10:]
-            self._last_fm_data.add_user(last_fm_id, user_id)
-            message = 'Добавил {} для пользователя {}'.format(last_fm_id, user_id)
-            await self._vk.messages_send_message(user_id, message)
-        elif body.startswith('unsetlastfm '):
-            pass
+            # todo transaction safe, data validation
+            if user.last_fm_id:
+                # remove old user
+                previous_last_fm_user = self._last_fm_data.get_user(user.last_fm_id)
+                vk_ids = previous_last_fm_user.vk_user_ids
+                if len(vk_ids) == 1:
+                    self._last_fm_data.remove(previous_last_fm_user.user_id)
+                else:
+                    vk_ids.remove(user.user_id)
+                    self._last_fm_data.update_user(previous_last_fm_user.user_id, vk_user_ids=vk_ids)
+                # add new
+                if self._last_fm_data.is_user_exist(last_fm_id):
+                    last_fm_user = self._last_fm_data.get_user(last_fm_id)
+                    vk_ids = last_fm_user.vk_user_ids
+                    vk_ids.append(user.user_id)
+                    self._last_fm_data.update_user(last_fm_user.user_id, vk_user_ids=vk_ids)
+                else:
+                    self._last_fm_data.add_user(last_fm_id, user.user_id)
+            else:
+                self._last_fm_data.add_user(last_fm_id, user.user_id)
+            self._bot_data.update_user(user.user_id, last_fm_id=last_fm_id)
+            message = 'Добавил {} для пользователя {}'.format(last_fm_id, user.user_id)
+            await self._vk.messages_send_message(user.user_id, message)
+        elif body.startswith('unsetlastfm'):
+            # todo transaction safe
+            if user.last_fm_id:
+                last_fm_user = self._last_fm_data.get_user(user.last_fm_id)
+                vk_ids = last_fm_user.vk_user_ids
+                if len(vk_ids) == 1:
+                    self._last_fm_data.remove(last_fm_user.user_id)
+                else:
+                    vk_ids.remove(user.user_id)
+                    self._last_fm_data.update_user(last_fm_user.user_id, vk_user_ids=vk_ids)
+                last_fm_id = user.last_fm_id
+                user.none_user(user_id, last_fm_id=True)
+                message = 'Отвязал профиль last.fm {}.'.format(last_fm_id)
+                await self._vk.messages_send_message(user_id, message)
+            else:
+                message = 'У тебя нет привязанного профиля last.fm, так что мне нечего отвязывать.'
+                await self._vk.messages_send_message(user_id, message)
         elif body.startswith('forget'):
             pass
         else:
-            message = 'Эта команда не поддерживается, потому что мой' \
-                      'разработчик ленивая жопа.'
+            message = 'Я тебя не понимаю.\n' \
+                      'Доступные команды:\n' \
+                      'setlastfm имя_аккаунта_last_fm\n' \
+                      'unsetlastfm'
             await self._vk.messages_send_message(user_id, message)
 
     def _extract_token(self, url: str, user_id: str) -> str:
