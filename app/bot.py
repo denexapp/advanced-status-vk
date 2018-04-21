@@ -102,7 +102,7 @@ class Bot:
                     vk_ids.remove(user.user_id)
                     self._last_fm_data.update_user(last_fm_user.user_id, vk_user_ids=vk_ids)
                 last_fm_id = user.last_fm_id
-                user.none_user(user_id, last_fm_id=True)
+                self._bot_data.none_user(user_id, last_fm_id=True)
                 message = 'Отвязал профиль last.fm {}.'.format(last_fm_id)
                 await self._vk.messages_send_message(user_id, message)
             else:
