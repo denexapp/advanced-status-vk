@@ -45,11 +45,13 @@ class Vk:
             parameters = {'act': 'a_check', 'key': key, 'ts': timestamp, 'wait': '15'}
             try:
                 async with self._session.get(server, params=parameters) as response:
-                    try:
-                        content = await response.json()
-                    except aiohttp.ContentTypeError:
-                        print(response.content)
-                        raise
+                    if response.headers['CONTENT-TYPE'] != 'application/json':
+                        print('bug')
+                        print(response.status)
+                        print(response.headers)
+                        print(await response.text())
+                        print('end bug')
+                    content = await response.json()
             except aiohttp.ServerDisconnectedError:
                 key, server, timestamp = await self.groups_get_long_poll_server(self._group_id)
                 continue
