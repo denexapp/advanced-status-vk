@@ -45,7 +45,7 @@ class Vk:
             parameters = {'act': 'a_check', 'key': key, 'ts': timestamp, 'wait': '15'}
             try:
                 async with self._session.get(server, params=parameters) as response:
-                    if response.headers['CONTENT-TYPE'] != 'application/json':
+                    if response.headers['Content-Type'] != 'application/json':
                         print('bug')
                         print(response.status)
                         print(response.headers)
