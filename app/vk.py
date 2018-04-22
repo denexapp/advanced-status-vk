@@ -48,6 +48,7 @@ class Vk:
                     if response.headers['Content-Type'] != 'application/json':
                         print('bug')
                         print(response.status)
+                        print(response.headers['Content-Type'])
                         print(response.headers)
                         print(await response.text())
                         print('end bug')
