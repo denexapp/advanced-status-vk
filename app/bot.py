@@ -33,7 +33,7 @@ class Bot:
 
     def run_bot(self):
         self._loop.create_task(self._watch_vk_messages())
-        self._loop.create_task(self._watch_last_fm_tracks())
+        # self._loop.create_task(self._watch_last_fm_tracks())
 
     async def _watch_vk_messages(self):
         async for message in self._vk.get_message():
