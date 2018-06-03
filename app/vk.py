@@ -5,7 +5,6 @@ from typing import Dict, Tuple, AsyncIterable
 
 import aiohttp
 
-from app.basedata import BaseData
 from app.ratelimiter import RateLimiter
 
 
@@ -14,7 +13,6 @@ class Vk:
                  session: aiohttp.ClientSession, api_version: str = '5.74'):
         self._group_id: str = group_id
         self._group_access_token: str = group_access_token
-        self._data: BaseData = BaseData()
         self._api_version: str = api_version
         self._session: aiohttp.ClientSession = session
         self._loop: asyncio.AbstractEventLoop = loop
