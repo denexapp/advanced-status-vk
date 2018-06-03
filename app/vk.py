@@ -12,13 +12,13 @@ from app.ratelimiter import RateLimiter
 class Vk:
     def __init__(self, group_id: str, group_access_token: str, loop: asyncio.AbstractEventLoop,
                  session: aiohttp.ClientSession, api_version: str = '5.74'):
-        self._group_id = group_id  # type: str
-        self._group_access_token = group_access_token  # type: str
-        self._data = BaseData()  # type: BaseData
+        self._group_id: str = group_id
+        self._group_access_token: str = group_access_token
+        self._data: BaseData = BaseData()
         self._api_version: str = api_version
         self._session: aiohttp.ClientSession = session
-        self._loop = loop  # type: asyncio.AbstractEventLoop
-        self._rate_limiter = RateLimiter(loop)  # type: RateLimiter
+        self._loop: asyncio.AbstractEventLoop = loop
+        self._rate_limiter: RateLimiter = RateLimiter(loop)
 
     async def _make_vk_request(self, url: str, parameters: Dict[str, str]):
         async with self._session.get(url, params=parameters) as response:

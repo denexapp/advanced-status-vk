@@ -7,7 +7,6 @@ import xml.dom.minidom as minidom
 
 import aiohttp
 
-from app.lastfmdata import LastFmData
 from app.ratelimiter import RateLimiter
 
 
@@ -31,12 +30,11 @@ class LastFm:
             self.name: str = name
             self.artist: str = artist
 
-    def __init__(self, api_key: str, shared_secret: str, data: LastFmData, loop: asyncio.AbstractEventLoop,
+    def __init__(self, api_key: str, shared_secret: str, loop: asyncio.AbstractEventLoop,
                  session: aiohttp.ClientSession):
         self._api_key: str = api_key
         self._shared_secret: str = shared_secret
         self._session: aiohttp.ClientSession = session
-        self._data: LastFmData = data
         self._loop: asyncio.AbstractEventLoop = loop
         self._rate_limiter: RateLimiter = RateLimiter(loop)
         self._rate = 0.2

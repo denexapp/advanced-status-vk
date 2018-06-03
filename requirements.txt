@@ -1,3 +1,7 @@
+dialogflow
+google-auth
+asyncinit
+aiogcd
 yarl
 aiohttp
 cchardet

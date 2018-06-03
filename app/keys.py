@@ -23,3 +23,8 @@ vk_group_id = os.environ['vk_group_id']
 vk_group_access_token = os.environ['vk_group_access_token']
 
 vk_auth_link = os.environ['vk_auth_link']
+
+datastore_project_id = os.environ['datastore_project_id']
+datastore_json = os.environ['datastore_json']
+
+dialogflow_json = os.environ['dialogflow_json']

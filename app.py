@@ -11,11 +11,16 @@ from app.bot import Bot
 def start_bot():
     loop = asyncio.get_event_loop()
     session = aiohttp.ClientSession(loop=loop)
-    # server = LastFmServer(data, session, loop)
-    # loop.create_task(server.run())
-    bot = Bot(keys.vk_group_id, keys.vk_group_access_token, keys.last_fm_api_key, keys.last_fm_shared_secret,
-              loop, session)
-    loop.create_task(bot.run_bot())
+    bot = loop.run_until_complete(Bot(keys.vk_group_id,
+                                      keys.vk_group_access_token,
+                                      keys.last_fm_api_key,
+                                      keys.last_fm_shared_secret,
+                                      keys.datastore_project_id,
+                                      keys.datastore_json,
+                                      keys.dialogflow_json,
+                                      loop,
+                                      session))
+    bot.run_bot()
     loop.run_forever()
 
 
