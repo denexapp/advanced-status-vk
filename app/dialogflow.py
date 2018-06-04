@@ -23,4 +23,4 @@ class Dialogflow:
         text_input = dialogflow.types.TextInput(text=message, language_code='ru')
         query_input = dialogflow.types.QueryInput(text=text_input)
         response = await self._loop.run_in_executor(None, self._session.detect_intent, session, query_input)
-        return response.query_result
+        return response.query_result.fulfillment_text
