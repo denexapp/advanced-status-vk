@@ -20,5 +20,7 @@ class Dialogflow:
         self._rate_limeter.wait_before_request('request', 0.4)
         session_id = user_id * 10 + channel_id
         session = self._session.session_path(self._gcp_project_id, session_id)
-        response = await self._loop.run_in_executor(None, self._session.detect_intent, session, message)
+        text_input = dialogflow.types.TextInput(text=message, language_code='ru')
+        query_input = dialogflow.types.QueryInput(text=text_input)
+        response = await self._loop.run_in_executor(None, self._session.detect_intent, session, query_input)
         return response.query_result
