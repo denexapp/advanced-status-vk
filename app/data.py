@@ -38,5 +38,5 @@ class Data:
             },
             'properties': { }
         })
-        await self._client.insert_entity(users_root_entity)
+        await self._client.upsert_entity(users_root_entity)
 
